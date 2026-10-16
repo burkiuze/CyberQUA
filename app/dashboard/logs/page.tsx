@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getI18n } from "@/lib/i18n/server";
 import { requireUserId } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { listLogs } from "@/lib/dashboard";
 
 const ENDPOINTS = ["/url/check", "/email/check", "/password/range", "/headers", "/ip", "/secrets/scan"];
 const STATUS_GROUPS = ["2xx", "4xx", "5xx"] as const;
@@ -22,20 +22,16 @@ export default async function LogsPage({ searchParams }: { searchParams: SearchP
   const status = (STATUS_GROUPS as readonly string[]).includes(statusRaw) ? statusRaw : "";
   const page = Math.max(1, Math.min(1000, Number.parseInt(first(sp.page) ?? "1", 10) || 1));
 
-  let query = supabaseAdmin()
-    .from("usage_logs")
-    .select("id, endpoint, status_code, latency_ms, created_at, api_key_id, api_keys(name, key_prefix)")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  if (endpoint) query = query.eq("endpoint", endpoint);
-  if (status) {
-    const base = Number(status[0]) * 100;
-    query = query.gte("status_code", base).lt("status_code", base + 100);
-  }
-  const { data } = await query;
-  const rows = (data ?? []).slice(0, PAGE_SIZE);
-  const hasNext = (data ?? []).length > PAGE_SIZE;
+  const base = status ? Number(status[0]) * 100 : null;
+  const data = await listLogs(userId, {
+    endpoint: endpoint || null,
+    statusMin: base,
+    statusMax: base !== null ? base + 100 : null,
+    offset: (page - 1) * PAGE_SIZE,
+    limit: PAGE_SIZE + 1,
+  });
+  const rows = data.slice(0, PAGE_SIZE);
+  const hasNext = data.length > PAGE_SIZE;
 
   const fmt = new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", { dateStyle: "short", timeStyle: "medium" });
   const href = (p: number) => {
@@ -92,19 +88,17 @@ export default async function LogsPage({ searchParams }: { searchParams: SearchP
               </tr>
             </thead>
             <tbody className="divide-y divide-line font-mono text-[12px]">
-              {rows.map((r) => {
-                const key = (Array.isArray(r.api_keys) ? r.api_keys[0] : r.api_keys) as { name: string; key_prefix: string } | null;
-                const code = r.status_code as number;
-                return (
-                  <tr key={r.id as number}>
-                    <td className="px-4 py-2.5 text-fg-muted">{fmt.format(new Date(r.created_at as string))}</td>
-                    <td className="px-4 py-2.5 text-fg">{r.endpoint as string}</td>
-                    <td className={`px-4 py-2.5 ${code >= 500 ? "text-danger" : code >= 400 ? "text-warn" : "text-accent"}`}>{code}</td>
-                    <td className="px-4 py-2.5 text-fg-muted">{r.latency_ms as number} ms</td>
-                    <td className="px-4 py-2.5 text-fg-dim">{key ? `${key.name} (${key.key_prefix}…)` : r.api_key_id ? "—" : dict.logs.playground}</td>
-                  </tr>
-                );
-              })}
+              {rows.map((r) => (
+                <tr key={r.id}>
+                  <td className="px-4 py-2.5 text-fg-muted">{fmt.format(new Date(r.created_at))}</td>
+                  <td className="px-4 py-2.5 text-fg">{r.endpoint}</td>
+                  <td className={`px-4 py-2.5 ${r.status_code >= 500 ? "text-danger" : r.status_code >= 400 ? "text-warn" : "text-accent"}`}>{r.status_code}</td>
+                  <td className="px-4 py-2.5 text-fg-muted">{r.latency_ms} ms</td>
+                  <td className="px-4 py-2.5 text-fg-dim">
+                    {r.key_name ? `${r.key_name} (${r.key_prefix}…)` : r.api_key_id ? "—" : dict.logs.playground}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

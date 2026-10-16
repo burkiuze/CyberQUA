@@ -7,7 +7,7 @@ import { zodDetails } from "@/lib/api/with-api-auth";
 import { PLAYGROUND_ENDPOINTS, type PlaygroundEndpointId } from "@/lib/api/endpoints";
 import { incrementQuota, logUsage } from "@/lib/api/deps";
 import { assertSameOrigin, ensureProfile, requireUserId } from "@/lib/auth";
-import { rateLimitFor } from "@/lib/ratelimit";
+import { rateLimit } from "@/lib/ratelimit";
 import { planLimits } from "@/lib/plans";
 import { MAX_SECRET_SCAN_BYTES } from "@/lib/checks/secrets";
 
@@ -31,7 +31,7 @@ export const POST = internalRoute(async (req, { locale, requestId }) => {
   const profile = await ensureProfile(userId);
   const limits = planLimits(profile.plan);
 
-  const rl = await rateLimitFor(limits.perMinute.secret, "1 m").limit(`user:${userId}`);
+  const rl = await rateLimit(`user:${userId}`, limits.perMinute.secret, 60);
   const rlHeaders = {
     "x-ratelimit-limit": String(rl.limit),
     "x-ratelimit-remaining": String(Math.max(0, rl.remaining)),

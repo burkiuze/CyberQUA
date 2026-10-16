@@ -1,57 +1,47 @@
 import "server-only";
-import { getRedis, cacheGet, cacheSet } from "@/lib/redis";
+import { cacheGet, cacheSet } from "@/lib/cache";
+import { rpc } from "@/lib/db";
 import { serverEnv } from "@/lib/env";
 import { fetchWithTimeout, UpstreamError } from "@/lib/http";
 import { ipVersion } from "@/lib/security/ip-ranges";
 import type { IpCheckDeps } from "@/lib/checks/ip";
 
-const TOR_SET = "tor:exits";
-const TOR_UPDATED = "tor:updated_at";
-const TOR_LOCK = "tor:lock";
 const TOR_REFRESH_MS = 60 * 60 * 1000;
 
-/** Downloads the Tor bulk exit list and atomically replaces the Redis set. */
-async function refreshTorList(): Promise<void> {
-  const redis = getRedis();
-  const locked = await redis.set(TOR_LOCK, "1", { nx: true, ex: 60 });
-  if (locked === null) return; // another instance is refreshing
-  try {
-    const res = await fetchWithTimeout("https://check.torproject.org/torbulkexitlist");
-    if (!res.ok) throw new UpstreamError("tor", `status ${res.status}`);
-    const ips = (await res.text())
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter((l) => l && !l.startsWith("#") && ipVersion(l) !== null);
-    if (ips.length === 0) throw new UpstreamError("tor", "empty list");
-    const tmp = `${TOR_SET}:tmp:${Date.now()}`;
-    for (let i = 0; i < ips.length; i += 1000) {
-      const chunk = ips.slice(i, i + 1000);
-      await redis.sadd(tmp, chunk[0]!, ...chunk.slice(1));
-    }
-    await redis.rename(tmp, TOR_SET);
-    await redis.expire(TOR_SET, 6 * 60 * 60);
-    await redis.set(TOR_UPDATED, String(Date.now()));
-  } finally {
-    await redis.del(TOR_LOCK);
-  }
+interface TorStatus {
+  updated_at: string | null;
+  has_list: boolean;
+  member: boolean;
 }
 
+/** Downloads the Tor bulk exit list and atomically replaces the stored set. */
+async function refreshTorList(): Promise<void> {
+  const res = await fetchWithTimeout("https://check.torproject.org/torbulkexitlist");
+  if (!res.ok) throw new UpstreamError("tor", `status ${res.status}`);
+  const ips = (await res.text())
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#") && ipVersion(l) !== null);
+  if (ips.length === 0) throw new UpstreamError("tor", "empty list");
+  await rpc("cq_tor_replace", { p_ips: ips });
+}
+
+/** Membership in the Tor exit list, refreshed at most hourly. */
 async function isTorExit(ip: string): Promise<boolean> {
-  const redis = getRedis();
-  const updatedRaw = await redis.get<string | number>(TOR_UPDATED);
-  const updated = updatedRaw ? Number(updatedRaw) : 0;
-  const stale = Date.now() - updated > TOR_REFRESH_MS;
-  if (stale) {
-    const exists = await redis.exists(TOR_SET);
-    if (!exists) {
+  let status = await rpc<TorStatus>("cq_tor_status", { p_ip: ip });
+  const updatedMs = status.updated_at ? Number(status.updated_at) * 1000 : 0;
+  if (Date.now() - updatedMs > TOR_REFRESH_MS) {
+    if (!status.has_list) {
       await refreshTorList();
+      status = await rpc<TorStatus>("cq_tor_status", { p_ip: ip });
     } else {
-      // Serve the existing list; refresh in the background of this request.
-      refreshTorList().catch(() => undefined);
+      // Serve the current list; refresh it alongside this request.
+      await refreshTorList().catch(() => undefined);
+      status = await rpc<TorStatus>("cq_tor_status", { p_ip: ip });
     }
   }
-  if (!(await redis.exists(TOR_SET))) throw new UpstreamError("tor", "exit list unavailable");
-  return (await redis.sismember(TOR_SET, ip)) === 1;
+  if (!status.has_list) throw new UpstreamError("tor", "exit list unavailable");
+  return status.member;
 }
 
 async function abuseLookup(apiKey: string, ip: string) {

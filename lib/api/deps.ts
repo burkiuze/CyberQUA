@@ -1,13 +1,12 @@
 import "server-only";
 import { waitUntil } from "@vercel/functions";
-import { getRedis, cacheGet, cacheSet } from "@/lib/redis";
-import { supabaseAdmin } from "@/lib/supabase/server";
-import { quotaKey } from "@/lib/plans";
+import { rpc } from "@/lib/db";
+import { cacheGet, cacheSet } from "@/lib/cache";
+import { rateLimit } from "@/lib/ratelimit";
+import { currentMonth } from "@/lib/plans";
 import type { ApiKeyRecord, AuthDeps, UsageEntry } from "@/lib/api/with-api-auth";
-import { rateLimitFor } from "@/lib/ratelimit";
 
 const KEY_CACHE_TTL = 60;
-const QUOTA_TTL = 40 * 24 * 60 * 60;
 
 export function apiKeyCacheKey(hash: string): string {
   return `apikey:${hash}`;
@@ -18,60 +17,54 @@ async function findKey(hash: string): Promise<ApiKeyRecord | null> {
   const cached = await cacheGet<ApiKeyRecord | { missing: true }>(cacheKey);
   if (cached) return "missing" in cached ? null : cached;
 
-  const { data, error } = await supabaseAdmin()
-    .from("api_keys")
-    .select("id, user_id, type, allowed_origins, revoked_at, profiles!inner(plan)")
-    .eq("key_hash", hash)
-    .maybeSingle();
-  if (error) throw new Error("api_key_lookup_failed");
-  if (!data) {
+  const row = await rpc<{
+    id: string;
+    user_id: string;
+    type: string;
+    allowed_origins: string[] | null;
+    revoked: boolean;
+    plan: string;
+  } | null>("cq_find_key", { p_hash: hash });
+  if (!row) {
     await cacheSet(cacheKey, { missing: true }, KEY_CACHE_TTL);
     return null;
   }
-  const profile = (Array.isArray(data.profiles) ? data.profiles[0] : data.profiles) as { plan?: string } | null;
   const record: ApiKeyRecord = {
-    id: data.id as string,
-    user_id: data.user_id as string,
-    type: data.type === "publishable" ? "publishable" : "secret",
-    allowed_origins: (data.allowed_origins as string[] | null) ?? [],
-    revoked: data.revoked_at !== null,
-    plan: profile?.plan === "pro" ? "pro" : "free",
+    id: row.id,
+    user_id: row.user_id,
+    type: row.type === "publishable" ? "publishable" : "secret",
+    allowed_origins: row.allowed_origins ?? [],
+    revoked: row.revoked,
+    plan: row.plan === "pro" ? "pro" : "free",
   };
   await cacheSet(cacheKey, record, KEY_CACHE_TTL);
   return record;
 }
 
 export async function incrementQuota(userId: string, monthlyLimit: number) {
-  const redis = getRedis();
-  const key = quotaKey(userId);
-  const used = await redis.incr(key);
-  if (used === 1) await redis.expire(key, QUOTA_TTL);
-  if (used > monthlyLimit) {
-    await redis.decr(key);
-    return { allowed: false, used: used - 1 };
-  }
-  return { allowed: true, used };
+  return rpc<{ allowed: boolean; used: number }>("cq_increment_quota", {
+    p_user: userId,
+    p_month: currentMonth(),
+    p_limit: monthlyLimit,
+  });
 }
 
 export async function logUsage(entry: UsageEntry): Promise<void> {
-  const db = supabaseAdmin();
-  await db.from("usage_logs").insert(entry);
-  if (entry.api_key_id && entry.status_code !== 401) {
-    // Update last_used_at at most once per minute per key (not for revoked keys).
-    const first = await getRedis().set(`lastused:${entry.api_key_id}`, "1", { nx: true, ex: 60 });
-    if (first !== null) {
-      await db.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", entry.api_key_id);
-    }
-  }
+  await rpc("cq_log_usage", {
+    p_user: entry.user_id,
+    p_key: entry.api_key_id,
+    p_endpoint: entry.endpoint,
+    p_status: entry.status_code,
+    p_latency: entry.latency_ms,
+  });
 }
 
 export function defaultAuthDeps(): AuthDeps {
   return {
     findKey,
-    rateLimit: (identifier, limit) => rateLimitFor(limit, "1 m").limit(identifier),
+    rateLimit: (identifier, limit) => rateLimit(identifier, limit, 60),
     incrementQuota,
     logUsage,
     waitUntil: (p) => waitUntil(p),
   };
 }
-

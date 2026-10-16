@@ -15,13 +15,12 @@ function required(name: string): string {
 
 export const serverEnv = {
   supabaseUrl: () => required("NEXT_PUBLIC_SUPABASE_URL"),
-  supabaseSecretKey: () => required("SUPABASE_SECRET_KEY"),
-  redisUrl: () => required("UPSTASH_REDIS_REST_URL"),
-  redisToken: () => required("UPSTASH_REDIS_REST_TOKEN"),
+  supabasePublishableKey: () => required("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
+  dbSecret: () => required("CYBERQUA_DB_SECRET"),
+  clerkPublishableKey: () => required("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"),
   abuseIpDbKey: () => optional("ABUSEIPDB_API_KEY"),
   urlhausKey: () => optional("URLHAUS_AUTH_KEY"),
   webRiskKey: () => optional("GOOGLE_WEB_RISK_API_KEY"),
-  clerkWebhookSecret: () => optional("CLERK_WEBHOOK_SIGNING_SECRET"),
 };
 
 export function siteUrl(): string {

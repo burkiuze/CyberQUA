@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { DashboardNav } from "@/components/dashboard/nav";
-import { ensureProfile, requireUserId } from "@/lib/auth";
+import { SessionGate, SessionOk } from "@/components/session-gate";
+import { currentUserId } from "@/lib/session";
+import { ensureProfile } from "@/lib/auth";
 
 export const metadata: Metadata = { robots: { index: false } };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const userId = await requireUserId();
-  await ensureProfile(userId);
+  const userId = await currentUserId();
+  if (userId) await ensureProfile(userId);
   return (
     <>
       <SiteHeader />
@@ -17,7 +19,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <DashboardNav />
           </div>
         </aside>
-        <main className="min-w-0 px-4 py-8 md:px-8">{children}</main>
+        <main className="min-w-0 px-4 py-8 md:px-8">
+          {userId ? (
+            <>
+              <SessionOk />
+              {children}
+            </>
+          ) : (
+            <SessionGate />
+          )}
+        </main>
       </div>
     </>
   );

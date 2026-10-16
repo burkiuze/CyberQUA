@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/ui/themes";
 import { enUS, trTR } from "@clerk/localizations";
 import { I18nProvider } from "@/components/i18n-provider";
+import { headers } from "next/headers";
 import { getI18n, getTheme } from "@/lib/i18n/server";
 import "./globals.css";
 
@@ -33,14 +34,19 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [{ locale, dict }, theme] = await Promise.all([getI18n(), getTheme()]);
+  const [{ locale, dict }, theme, h] = await Promise.all([getI18n(), getTheme(), headers()]);
+  const nonce = h.get("x-nonce") ?? undefined;
   const accent = theme === "dark" ? "#2de2c4" : "#0b9c84";
 
   return (
     <html lang={locale} data-theme={theme} className={`${inter.variable} ${jetbrains.variable}`}>
       <body className="min-h-dvh">
         <ClerkProvider
-          dynamic
+          nonce={nonce}
+          signInUrl="/login"
+          signUpUrl="/register"
+          signInFallbackRedirectUrl="/dashboard"
+          signUpFallbackRedirectUrl="/dashboard"
           localization={locale === "tr" ? trTR : enUS}
           afterSignOutUrl="/"
           appearance={{

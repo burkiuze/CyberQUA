@@ -1,21 +1,10 @@
 import "server-only";
-import { Redis } from "@upstash/redis";
-import { serverEnv } from "@/lib/env";
-
-let client: Redis | null = null;
-
-export function getRedis(): Redis {
-  if (!client) {
-    client = new Redis({ url: serverEnv.redisUrl(), token: serverEnv.redisToken() });
-  }
-  return client;
-}
+import { rpc } from "@/lib/db";
 
 /** Reads a JSON value from the cache. Cache failures are treated as a miss. */
 export async function cacheGet<T>(key: string): Promise<T | null> {
   try {
-    const value = await getRedis().get<T>(key);
-    return value ?? null;
+    return (await rpc<T | null>("cq_cache_get", { p_key: key })) ?? null;
   } catch {
     return null;
   }
@@ -24,7 +13,7 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 /** Writes a JSON value to the cache. Cache failures never break a request. */
 export async function cacheSet(key: string, value: unknown, ttlSeconds: number): Promise<void> {
   try {
-    await getRedis().set(key, value, { ex: ttlSeconds });
+    await rpc("cq_cache_set", { p_key: key, p_value: value, p_ttl_seconds: ttlSeconds });
   } catch {
     // ignore cache write failures
   }
@@ -33,7 +22,7 @@ export async function cacheSet(key: string, value: unknown, ttlSeconds: number):
 export async function cacheDel(...keys: string[]): Promise<void> {
   if (keys.length === 0) return;
   try {
-    await getRedis().del(...keys);
+    await rpc("cq_cache_del", { p_keys: keys });
   } catch {
     // ignore
   }

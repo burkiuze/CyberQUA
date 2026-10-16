@@ -21,7 +21,3 @@ export const MAX_ACTIVE_KEYS = 5;
 export function currentMonth(date = new Date()): string {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
 }
-
-export function quotaKey(userId: string, month = currentMonth()): string {
-  return `quota:${userId}:${month}`;
-}

@@ -5,7 +5,7 @@ import { newRequestId, successResponse } from "@/lib/api/response";
 import { toErrorResponse, zodDetails } from "@/lib/api/with-api-auth";
 import { checkUrl, normalizeUrlInput } from "@/lib/checks/url";
 import { defaultUrlDeps } from "@/lib/checks/url-sources";
-import { clientIp, demoLimiter } from "@/lib/ratelimit";
+import { clientIp, demoRateLimit } from "@/lib/ratelimit";
 import { localeFromAcceptLanguage } from "@/lib/i18n/locale";
 
 export const runtime = "nodejs";
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const locale = localeFromAcceptLanguage(req.headers.get("accept-language"));
   let headers: Record<string, string> = {};
   try {
-    const rl = await demoLimiter().limit(`demo:${clientIp(req)}`);
+    const rl = await demoRateLimit(clientIp(req));
     headers = {
       "x-ratelimit-limit": String(rl.limit),
       "x-ratelimit-remaining": String(Math.max(0, rl.remaining)),

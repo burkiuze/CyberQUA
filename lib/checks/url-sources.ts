@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheGet, cacheSet } from "@/lib/redis";
+import { cacheGet, cacheSet } from "@/lib/cache";
 import { serverEnv } from "@/lib/env";
 import { fetchWithTimeout, UpstreamError } from "@/lib/http";
 import type { BlacklistSource, DomainAgeLookup, UrlCheckDeps } from "@/lib/checks/url";

@@ -2,7 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { connect as tlsConnect, type PeerCertificate } from "node:tls";
 import { isIP } from "node:net";
-import { cacheGet, cacheSet } from "@/lib/redis";
+import { cacheGet, cacheSet } from "@/lib/cache";
 import { assertSafeUrl, safeFetchHeaders, type Resolver, systemResolver } from "@/lib/security/ssrf";
 import { auditHeaders, type HeaderAuditData, type TlsInfo } from "@/lib/checks/headers";
 import type { Locale } from "@/lib/i18n/locale";

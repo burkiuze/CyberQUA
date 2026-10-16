@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useClerk } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import { useI18n } from "@/components/i18n-provider";
 import type { Locale } from "@/lib/i18n/locale";
 
@@ -45,6 +45,7 @@ export function LanguageForm({ current }: { current: Locale }) {
 export function DeleteAccount() {
   const { dict, locale } = useI18n();
   const { signOut } = useClerk();
+  const { user } = useUser();
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,12 @@ export function DeleteAccount() {
           headers: { "accept-language": locale },
         }).catch(() => null);
         if (res?.ok) {
+          // CyberQUA data is gone; now delete the Clerk account itself.
+          try {
+            await user?.delete();
+          } catch {
+            // If Clerk refuses (e.g. deletion disabled), still sign out.
+          }
           await signOut({ redirectUrl: "/" });
           return;
         }

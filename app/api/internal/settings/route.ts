@@ -3,7 +3,7 @@ import { ApiError, internalRoute, json } from "@/lib/api/internal";
 import { readJsonBody } from "@/lib/api/body";
 import { zodDetails } from "@/lib/api/with-api-auth";
 import { assertSameOrigin, ensureProfile, requireUserId } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { rpc } from "@/lib/db";
 import { LOCALE_COOKIE } from "@/lib/i18n/locale";
 
 export const runtime = "nodejs";
@@ -17,8 +17,7 @@ export const POST = internalRoute(async (req) => {
   await ensureProfile(userId);
   const parsed = schema.safeParse(await readJsonBody(req, 1024));
   if (!parsed.success) throw new ApiError("invalid_request", zodDetails(parsed.error));
-  const { error } = await supabaseAdmin().from("profiles").update({ locale: parsed.data.locale }).eq("id", userId);
-  if (error) throw new Error("settings_update_failed");
+  await rpc("cq_set_locale", { p_user: userId, p_locale: parsed.data.locale });
   return json({ locale: parsed.data.locale }, 200, {
     "set-cookie": `${LOCALE_COOKIE}=${parsed.data.locale}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`,
   });

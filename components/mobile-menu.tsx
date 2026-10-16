@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { useI18n } from "@/components/i18n-provider";
 
-export function MobileMenu({ links, signedIn }: { links: Array<{ href: string; label: string }>; signedIn: boolean }) {
+export function MobileMenu({ links }: { links: Array<{ href: string; label: string }> }) {
   const [open, setOpen] = useState(false);
+  const { isSignedIn } = useAuth();
+  const signedIn = !!isSignedIn;
   const { dict } = useI18n();
   return (
     <div className="md:hidden">

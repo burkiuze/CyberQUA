@@ -1,67 +1,63 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-const isProtectedPage = createRouteMatcher(["/dashboard(.*)"]);
-const isInternalApi = createRouteMatcher(["/api/internal(.*)"]);
-
-const clerkProxy = clerkMiddleware(
-  async (auth, req) => {
-    if (isInternalApi(req)) {
-      const { userId } = await auth();
-      if (!userId) {
-        return NextResponse.json(
-          { success: false, error: { code: "unauthorized", message: "Unauthorized" } },
-          { status: 401 },
-        );
-      }
-      return;
-    }
-    if (isProtectedPage(req)) {
-      await auth.protect();
-    }
-  },
-  {
-    signInUrl: "/login",
-    signUpUrl: "/register",
-    // Nonce-based strict CSP ('strict-dynamic'); Clerk merges its own required sources.
-    contentSecurityPolicy: {
-      strict: true,
-      directives: {
-        "object-src": ["none"],
-        "base-uri": ["self"],
-        "frame-ancestors": ["none"],
-        "form-action": ["self"],
-        "img-src": ["self", "data:", "https://img.clerk.com"],
-        "font-src": ["self"],
-        "upgrade-insecure-requests": [],
-      },
-    },
-  },
-);
-
-/**
- * Until CLERK_SECRET_KEY is configured the public pages (home, docs, legal)
- * keep working; session-only areas answer with a clear "not configured" state.
- */
-export default function proxy(req: NextRequest, event: NextFetchEvent) {
-  if (!process.env.CLERK_SECRET_KEY) {
-    if (isInternalApi(req)) {
-      return NextResponse.json(
-        { success: false, error: { code: "auth_not_configured", message: "Authentication is not configured yet." } },
-        { status: 503 },
-      );
-    }
-    if (isProtectedPage(req)) return NextResponse.redirect(new URL("/login", req.url));
-    return NextResponse.next();
+/** Clerk Frontend API host from the publishable key (pk_test_/pk_live_ + base64("host$")). */
+function clerkFrontendApi(): string | null {
+  const pk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
+  const m = /^pk_(?:test|live)_([A-Za-z0-9+/=_-]+)$/.exec(pk);
+  if (!m) return null;
+  try {
+    const host = atob(m[1]!).replace(/\$$/, "");
+    return /^[a-z0-9.-]+$/i.test(host) ? host : null;
+  } catch {
+    return null;
   }
-  return clerkProxy(req, event);
+}
+
+function buildCsp(nonce: string): string {
+  const fapi = clerkFrontendApi();
+  const clerk = fapi ? `https://${fapi}` : "";
+  const isDev = process.env.NODE_ENV === "development";
+  const directives: Record<string, string[]> = {
+    "default-src": ["'self'"],
+    // 'strict-dynamic' lets the nonce'd Clerk loader pull in clerk-js / clerk-ui.
+    "script-src": ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": ["'self'", "data:", "https://img.clerk.com"],
+    "font-src": ["'self'"],
+    "connect-src": ["'self'", clerk, "https://clerk-telemetry.com", "https://*.clerk-telemetry.com"].filter(Boolean),
+    "frame-src": ["'self'", "https://challenges.cloudflare.com", clerk].filter(Boolean),
+    "worker-src": ["'self'", "blob:"],
+    "object-src": ["'none'"],
+    "base-uri": ["'self'"],
+    "form-action": ["'self'"],
+    "frame-ancestors": ["'none'"],
+  };
+  return [
+    ...Object.entries(directives).map(([k, v]) => `${k} ${v.join(" ")}`),
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
+
+/** Adds a per-request nonce and a strict Content-Security-Policy to every page. */
+export function proxy(request: NextRequest) {
+  const nonce = btoa(crypto.randomUUID());
+  const csp = buildCsp(nonce);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("content-security-policy", csp);
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("content-security-policy", csp);
+  return response;
 }
 
 export const config = {
   matcher: [
-    // Pages (skip Next internals and static files)
-    "/((?!_next|api/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Internal session APIs only — the public /api/v1 routes authenticate with API keys.
-    "/api/internal/(.*)",
+    {
+      source: "/((?!_next|api/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
   ],
 };

@@ -117,7 +117,7 @@ export function createApiHandler<S extends z.ZodType>(def: EndpointDef<S>, deps:
       const rawKey = match?.[1] ?? "";
       if (!API_KEY_RE.test(rawKey)) throw new ApiError("invalid_api_key");
 
-      // 3. Lookup by SHA-256 hash (Redis cache → Supabase)
+      // 3. Lookup by SHA-256 hash (cache → database)
       const record = await deps.findKey(hashApiKey(rawKey));
       if (!record) throw new ApiError("invalid_api_key");
       key = record;

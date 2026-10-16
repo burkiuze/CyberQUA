@@ -12,7 +12,7 @@ import { fetchPwnedRange, SHA1_PREFIX_RE, type PasswordRangeData } from "@/lib/c
 import { MAX_SECRET_SCAN_BYTES, scanSecrets } from "@/lib/checks/secrets";
 import { checkHeaders } from "@/lib/checks/headers-probe";
 import { SsrfError } from "@/lib/security/ssrf";
-import { cacheGet, cacheSet } from "@/lib/redis";
+import { cacheGet, cacheSet } from "@/lib/cache";
 import { UpstreamError } from "@/lib/http";
 
 const SMALL_BODY = 8 * 1024;

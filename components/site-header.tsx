@@ -1,19 +1,17 @@
 import Link from "next/link";
-import { currentUserId } from "@/lib/session";
-import { UserButton } from "@clerk/nextjs";
 import { Logo } from "@/components/ui/logo";
 import { LocaleSwitcher, ThemeToggle } from "@/components/preferences";
 import { MobileMenu } from "@/components/mobile-menu";
+import { HeaderAuth } from "@/components/header-auth";
 import { getI18n } from "@/lib/i18n/server";
 
 export async function SiteHeader() {
-  const [{ dict }, userId] = await Promise.all([getI18n(), currentUserId()]);
-  const signedIn = !!userId;
+  const { dict } = await getI18n();
   const links = [
     { href: "/docs", label: dict.nav.docs },
     { href: "/playground", label: dict.nav.playground },
     { href: "/#pricing", label: dict.nav.pricing },
-    ...(signedIn ? [{ href: "/dashboard", label: dict.nav.dashboard }] : []),
+    { href: "/dashboard", label: dict.nav.dashboard },
   ];
 
   return (
@@ -36,33 +34,10 @@ export async function SiteHeader() {
         <div className="flex items-center gap-1">
           <LocaleSwitcher />
           <ThemeToggle />
-          <div className="ml-2 hidden items-center gap-2 md:flex">
-            {signedIn ? (
-              <>
-                <Link href="/dashboard" className="btn-ghost">
-                  {dict.nav.dashboard}
-                </Link>
-                <div className="flex min-h-11 min-w-11 items-center justify-center">
-                  <UserButton />
-                </div>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="btn text-fg-muted hover:text-fg">
-                  {dict.nav.login}
-                </Link>
-                <Link href="/register" className="btn-primary">
-                  {dict.nav.register}
-                </Link>
-              </>
-            )}
+          <div className="ml-2">
+            <HeaderAuth />
           </div>
-          {signedIn ? (
-            <div className="flex min-h-11 min-w-11 items-center justify-center md:hidden">
-              <UserButton />
-            </div>
-          ) : null}
-          <MobileMenu links={links} signedIn={signedIn} />
+          <MobileMenu links={links} />
         </div>
       </div>
     </header>

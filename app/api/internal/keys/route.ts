@@ -3,26 +3,17 @@ import { ApiError, internalRoute, json } from "@/lib/api/internal";
 import { readJsonBody } from "@/lib/api/body";
 import { zodDetails } from "@/lib/api/with-api-auth";
 import { generateApiKey, hashApiKey, keyPrefix, normalizeOrigin } from "@/lib/api/keys";
-import { apiKeyCacheKey } from "@/lib/api/deps";
 import { assertSameOrigin, ensureProfile, requireUserId } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase/server";
-import { cacheDel } from "@/lib/redis";
+import { listKeys, type KeyRow } from "@/lib/dashboard";
+import { rpc } from "@/lib/db";
 import { MAX_ACTIVE_KEYS } from "@/lib/plans";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PUBLIC_COLUMNS = "id, name, type, key_prefix, allowed_origins, created_at, last_used_at, revoked_at";
-
 export const GET = internalRoute(async () => {
   const userId = await requireUserId();
-  const { data, error } = await supabaseAdmin()
-    .from("api_keys")
-    .select(PUBLIC_COLUMNS)
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error("keys_list_failed");
-  return json({ keys: data ?? [] });
+  return json({ keys: await listKeys(userId) });
 });
 
 const createSchema = z
@@ -60,34 +51,20 @@ export const POST = internalRoute(async (req) => {
     origins = [...new Set(normalized.map((o) => o.value!))];
   }
 
-  const db = supabaseAdmin();
-  const { count, error: countError } = await db
-    .from("api_keys")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .is("revoked_at", null);
-  if (countError) throw new Error("keys_count_failed");
-  if ((count ?? 0) >= MAX_ACTIVE_KEYS) throw new ApiError("key_limit_reached");
-
   const key = generateApiKey(type);
-  const { data, error } = await db
-    .from("api_keys")
-    .insert({
-      user_id: userId,
-      name,
-      type,
-      key_prefix: keyPrefix(key),
-      key_hash: hashApiKey(key),
-      allowed_origins: origins,
-    })
-    .select(PUBLIC_COLUMNS)
-    .single();
-  if (error) {
-    if (error.message.includes("active_key_limit")) throw new ApiError("key_limit_reached");
-    throw new Error("key_create_failed");
-  }
+  const result = await rpc<{ error?: string; record?: KeyRow }>("cq_create_key", {
+    p_user: userId,
+    p_name: name,
+    p_type: type,
+    p_prefix: keyPrefix(key),
+    p_hash: hashApiKey(key),
+    p_origins: origins,
+    p_max_active: MAX_ACTIVE_KEYS,
+  });
+  if (result.error === "key_limit_reached") throw new ApiError("key_limit_reached");
+  if (!result.record) throw new Error("key_create_failed");
   // The full key is returned exactly once and never stored.
-  return json({ key, record: data }, 201);
+  return json({ key, record: result.record }, 201);
 });
 
 const deleteSchema = z.object({ id: z.uuid() });
@@ -97,25 +74,8 @@ export const DELETE = internalRoute(async (req) => {
   const userId = await requireUserId();
   const parsed = deleteSchema.safeParse({ id: new URL(req.url).searchParams.get("id") });
   if (!parsed.success) throw new ApiError("invalid_request", zodDetails(parsed.error));
-
-  const db = supabaseAdmin();
-  const { data: existing } = await db
-    .from("api_keys")
-    .select("id, key_hash, revoked_at")
-    .eq("id", parsed.data.id)
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (!existing) throw new ApiError("not_found");
-
-  if (!existing.revoked_at) {
-    const { error } = await db
-      .from("api_keys")
-      .update({ revoked_at: new Date().toISOString() })
-      .eq("id", parsed.data.id)
-      .eq("user_id", userId);
-    if (error) throw new Error("key_revoke_failed");
-  }
-  // Revocation takes effect immediately: drop the cached key record.
-  await cacheDel(apiKeyCacheKey(existing.key_hash as string));
+  // Revocation also drops the cached key record, so it takes effect immediately.
+  const result = await rpc<{ found: boolean }>("cq_revoke_key", { p_user: userId, p_id: parsed.data.id });
+  if (!result.found) throw new ApiError("not_found");
   return json({ revoked: true });
 });
