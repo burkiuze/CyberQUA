@@ -41,7 +41,7 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <div className="frame dot-grid">
           <div className="grid gap-12 px-4 pb-16 pt-14 md:px-10 md:pt-24 lg:grid-cols-[1.15fr_1fr] lg:items-center">
-            <div>
+            <div className="min-w-0">
               <p className="inline-flex items-center gap-2 border border-line bg-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-fg-muted">
                 <span aria-hidden className="h-1.5 w-1.5 bg-accent" />
                 {dict.hero.badge}
@@ -59,7 +59,7 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative min-w-0">
               <div className="card overflow-hidden">
                 <Corners className="text-accent" />
                 <div className="flex items-center justify-between border-b border-line px-3 py-2">
@@ -129,7 +129,7 @@ export default async function HomePage() {
       {/* CODE */}
       <section id="code" className="section">
         <div className="frame grid gap-10 px-4 py-16 md:px-10 lg:grid-cols-[1fr_1.4fr]">
-          <div>
+          <div className="min-w-0">
             <SectionLabel index="03">{dict.code.label}</SectionLabel>
             <h2 className="mt-6 text-3xl font-semibold tracking-tight md:text-4xl">{dict.code.title}</h2>
             <p className="mt-3 text-fg-muted">{dict.code.subtitle}</p>
@@ -138,6 +138,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <CodeTabs
+            className="min-w-0"
             tabs={[
               { id: "curl", label: "cURL", code: snippets.curl },
               { id: "js", label: "JavaScript", code: snippets.js },
@@ -216,7 +217,7 @@ export default async function HomePage() {
       {/* FAQ */}
       <section id="faq" className="section">
         <div className="frame grid gap-10 px-4 py-16 md:px-10 lg:grid-cols-[1fr_2fr]">
-          <div>
+          <div className="min-w-0">
             <SectionLabel index="06">{dict.faq.label}</SectionLabel>
             <h2 className="mt-6 text-3xl font-semibold tracking-tight md:text-4xl">{dict.faq.title}</h2>
           </div>

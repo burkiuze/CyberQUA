@@ -42,7 +42,7 @@ export default clerkMiddleware(
 export const config = {
   matcher: [
     // Pages (skip Next internals and static files)
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|api/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Internal session APIs only — the public /api/v1 routes authenticate with API keys.
     "/api/internal/(.*)",
   ],

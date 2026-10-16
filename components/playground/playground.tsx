@@ -88,7 +88,7 @@ export function Playground() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <form onSubmit={send} className="card space-y-4 p-5">
+      <form onSubmit={send} className="card min-w-0 space-y-4 p-5">
         <label className="block">
           <span className="eyebrow mb-2 block">{dict.playground.endpoint}</span>
           <select
@@ -138,7 +138,7 @@ export function Playground() {
         </button>
       </form>
 
-      <div className="card min-h-80 overflow-hidden">
+      <div className="card min-h-80 min-w-0 overflow-hidden">
         <div className="flex items-center justify-between border-b border-line px-4 py-2">
           <span className="eyebrow">{dict.playground.response}</span>
           {response ? (

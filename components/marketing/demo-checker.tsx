@@ -110,7 +110,7 @@ export function DemoChecker() {
         ) : null}
         {result ? (
           <div className="grid gap-6 md:grid-cols-[220px_1fr]">
-            <div>
+            <div className="min-w-0">
               <p className="eyebrow mb-2">{dict.demo.score}</p>
               <ScoreMeter score={result.score} risk={result.risk} />
               <div className="mt-3 flex items-center gap-2">
@@ -119,7 +119,7 @@ export function DemoChecker() {
               </div>
               <p className="mt-3 break-all font-mono text-xs text-fg-muted">{result.domain}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="eyebrow mb-2">{dict.demo.reasons}</p>
               {result.reasons.length === 0 ? (
                 <p className="text-sm text-fg-muted">{dict.demo.noReasons}</p>

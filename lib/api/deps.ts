@@ -56,8 +56,8 @@ export async function incrementQuota(userId: string, monthlyLimit: number) {
 export async function logUsage(entry: UsageEntry): Promise<void> {
   const db = supabaseAdmin();
   await db.from("usage_logs").insert(entry);
-  if (entry.api_key_id) {
-    // Update last_used_at at most once per minute per key.
+  if (entry.api_key_id && entry.status_code !== 401) {
+    // Update last_used_at at most once per minute per key (not for revoked keys).
     const first = await getRedis().set(`lastused:${entry.api_key_id}`, "1", { nx: true, ex: 60 });
     if (first !== null) {
       await db.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", entry.api_key_id);

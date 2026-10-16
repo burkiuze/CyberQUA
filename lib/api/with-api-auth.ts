@@ -120,8 +120,8 @@ export function createApiHandler<S extends z.ZodType>(def: EndpointDef<S>, deps:
       // 3. Lookup by SHA-256 hash (Redis cache → Supabase)
       const record = await deps.findKey(hashApiKey(rawKey));
       if (!record) throw new ApiError("invalid_api_key");
-      if (record.revoked) throw new ApiError("revoked_api_key");
       key = record;
+      if (record.revoked) throw new ApiError("revoked_api_key");
 
       // 4. Key type rules
       if (record.type === "secret") {

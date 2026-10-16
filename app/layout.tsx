@@ -40,6 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} data-theme={theme} className={`${inter.variable} ${jetbrains.variable}`}>
       <body className="min-h-dvh">
         <ClerkProvider
+          dynamic
           localization={locale === "tr" ? trTR : enUS}
           afterSignOutUrl="/"
           appearance={{
