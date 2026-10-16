@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "title": "CyberQUA — Geliştiriciler için Güvenlik API'si",
+    "description": "Güvenliği sen yazma, CyberQUA'ya sor. Link, şifre sızıntısı, e-posta, IP, güvenlik header ve sızmış anahtar kontrolleri tek bir HTTP isteğiyle."
+  },
+  "nav": {
+    "docs": "Dokümantasyon",
+    "playground": "Playground",
+    "pricing": "Fiyatlar",
+    "dashboard": "Panel",
+    "login": "Giriş yap",
+    "register": "Ücretsiz başla",
+    "menu": "Menü",
+    "close": "Kapat",
+    "theme": "Tema",
+    "language": "Dil",
+    "light": "Açık",
+    "dark": "Koyu"
+  },
+  "hero": {
+    "badge": "v1 YAYINDA · 6 GÜVENLİK ENDPOINT'İ",
+    "title": "Güvenliği sen yazma, CyberQUA'ya sor.",
+    "subtitle": "Oltalama linkleri, sızmış şifreler, çöp e-postalar, Tor çıkışları, eksik güvenlik header'ları ve koda gömülmüş API anahtarları — hepsi tek bir HTTP isteğiyle.",
+    "cta": "Ücretsiz API anahtarı al",
+    "secondary": "Dokümantasyonu oku",
+    "stat1": "istek / ay ücretsiz",
+    "stat2": "ortalama yanıt",
+    "stat3": "şifre veya kod saklanmaz"
+  },
+  "demo": {
+    "label": "CANLI DEMO",
+    "title": "Bir linki şimdi dene",
+    "subtitle": "Link açılmaz; sadece adres ve itibar kaynakları analiz edilir.",
+    "placeholder": "https://g00gle-login.xyz/verify",
+    "submit": "Analiz et",
+    "loading": "Analiz ediliyor…",
+    "score": "Risk puanı",
+    "reasons": "Bulgular",
+    "noReasons": "Belirgin bir risk bulunamadı.",
+    "examples": "Örnekler:",
+    "limit": "Demo IP başına saatte 10 istekle sınırlıdır."
+  },
+  "risk": {
+    "safe": "Güvenli",
+    "low": "Düşük",
+    "medium": "Orta",
+    "high": "Yüksek",
+    "critical": "Kritik"
+  },
+  "features": {
+    "label": "ENDPOINT'LER",
+    "title": "Altı kontrol. Tek API.",
+    "url": { "title": "Link risk analizi", "desc": "Taklit domain, homoglyph, yeni domain, riskli TLD, kısaltıcı ve kara liste kontrolü. Link asla açılmaz." },
+    "password": { "title": "Şifre sızıntısı", "desc": "k-anonymity ile: şifre veya tam hash hiçbir zaman cihazdan çıkmaz." },
+    "headers": { "title": "Güvenlik header denetimi", "desc": "HSTS, CSP, clickjacking, çerezler ve TLS. A+–F notu ve hazır düzeltme yapılandırmaları." },
+    "email": { "title": "E-posta doğrulama", "desc": "Geçici e-posta, MX kaydı, rol adresi ve yazım hatası önerisi." },
+    "ip": { "title": "IP itibarı", "desc": "Özel aralık, Tor çıkış düğümü ve AbuseIPDB kötüye kullanım puanı." },
+    "secrets": { "title": "Sızmış anahtar tarama", "desc": "OpenAI, AWS, GitHub, Stripe, Supabase ve daha fazlası. İçerik saklanmaz, değerler maskelenir." }
+  },
+  "code": {
+    "label": "ENTEGRASYON",
+    "title": "Üç satırda entegre et",
+    "subtitle": "Her dilde aynı basit JSON. Resmi SDK ile şifre kontrolü tamamen cihazda yapılır."
+  },
+  "usecases": {
+    "label": "KULLANIM SENARYOLARI",
+    "title": "Gerçek ürünlerde gerçek koruma",
+    "items": [
+      { "title": "Sohbet uygulamaları", "desc": "Paylaşılan linkin oltalama olup olmadığını mesaj gönderilmeden önce kontrol et." },
+      { "title": "Kayıt formları", "desc": "Sızmış şifreleri ve çöp e-postayla açılan sahte hesapları kayıt anında engelle." },
+      { "title": "Giriş güvenliği", "desc": "Tor veya kötü itibarlı IP'lerden gelen girişlerde ek doğrulama iste." },
+      { "title": "CI/CD", "desc": "Kodu yayınlamadan önce içinde sızmış API anahtarı ara, build'i durdur." },
+      { "title": "Site denetimi", "desc": "Müşteri sitelerinin güvenlik header'larını puanla, hazır düzeltmeleri gönder." },
+      { "title": "Destek ekipleri", "desc": "Şüpheli e-posta ve linkleri tek tıkla değerlendir." }
+    ]
+  },
+  "pricing": {
+    "label": "FİYATLAR",
+    "title": "Ücretsiz başla, büyüdükçe yükselt",
+    "free": "Ücretsiz",
+    "pro": "Pro",
+    "month": "/ay",
+    "soon": "Yakında",
+    "freeFeatures": ["Ayda 1.000 istek", "Dakikada 30 istek", "Tüm 6 endpoint", "5 API anahtarı", "Topluluk desteği"],
+    "proFeatures": ["Ayda 50.000 istek", "Dakikada 300 istek", "Tüm 6 endpoint", "Öncelikli destek", "SLA"],
+    "freeCta": "Hemen başla",
+    "proCta": "Yakında"
+  },
+  "faq": {
+    "label": "SSS",
+    "title": "Sık sorulan sorular",
+    "items": [
+      { "q": "Şifrelerimi CyberQUA'ya gönderiyor muyum?", "a": "Hayır. SDK şifreyi cihazda SHA-1 ile hash'ler ve yalnızca ilk 5 karakteri gönderir. Karşılaştırma yine cihazda yapılır." },
+      { "q": "Gönderdiğim linkleri veya kodları saklıyor musunuz?", "a": "Hayır. Kullanım loglarında sadece zaman, endpoint, durum kodu ve süre tutulur. Linkler, e-postalar, şifre hash'leri ve kod içerikleri asla saklanmaz." },
+      { "q": "/url/check linki açıyor mu?", "a": "Hayır. Sadece URL'nin kendisi ve dış itibar kaynakları analiz edilir; hedef sayfaya hiçbir istek atılmaz." },
+      { "q": "Tarayıcıdan kullanabilir miyim?", "a": "Evet, açık (cq_pub_) anahtarlarla ve sadece izin verdiğiniz domainlerden. Gizli anahtarlar yalnızca sunucuda çalışır." },
+      { "q": "Kota dolarsa ne olur?", "a": "API 429 quota_exceeded döner. Kota her ayın başında (UTC) sıfırlanır." }
+    ]
+  },
+  "footer": {
+    "tagline": "Geliştiriciler için güvenlik API'si.",
+    "product": "Ürün",
+    "legal": "Yasal",
+    "privacy": "Gizlilik (KVKK)",
+    "terms": "Kullanım koşulları",
+    "status": "Durum",
+    "rights": "Tüm hakları saklıdır."
+  },
+  "auth": {
+    "loginTitle": "Tekrar hoş geldin",
+    "loginSubtitle": "E-posta, Google, GitHub veya GitLab ile giriş yap.",
+    "registerTitle": "Hesap oluştur",
+    "registerSubtitle": "Ücretsiz API anahtarını dakikalar içinde al. E-posta doğrulaması zorunludur.",
+    "forgotTitle": "Şifreni sıfırla",
+    "forgotSubtitle": "Giriş ekranında e-postanı girip \"Şifremi unuttum\" bağlantısına tıkla; doğrulama kodu e-postana gönderilir.",
+    "forgotCta": "Şifre sıfırlamaya devam et"
+  },
+  "dashboard": {
+    "overview": "Genel bakış",
+    "keys": "API anahtarları",
+    "logs": "İstek logları",
+    "settings": "Ayarlar",
+    "playground": "Playground",
+    "docs": "Dokümantasyon",
+    "thisMonth": "Bu ayki kullanım",
+    "quota": "Aylık kota",
+    "requests30": "Son 30 gün istek",
+    "endpointDist": "Endpoint dağılımı",
+    "errorRate": "Hata oranı",
+    "avgLatency": "Ortalama süre",
+    "plan": "Plan",
+    "noData": "Henüz istek yok. İlk anahtarını oluşturup bir istek at.",
+    "requests": "istek",
+    "errors": "hata",
+    "createFirst": "İlk anahtarını oluştur"
+  },
+  "keys": {
+    "title": "API anahtarları",
+    "subtitle": "En fazla 5 aktif anahtar. Gizli anahtarları sadece sunucuda kullan.",
+    "create": "Anahtar oluştur",
+    "name": "İsim",
+    "namePlaceholder": "Üretim sunucusu",
+    "type": "Tür",
+    "secret": "Gizli (sunucu)",
+    "publishable": "Açık (tarayıcı)",
+    "origins": "İzinli domainler",
+    "originsHelp": "Her satıra bir origin: https://example.com veya https://*.example.com",
+    "prefix": "Prefix",
+    "created": "Oluşturuldu",
+    "lastUsed": "Son kullanım",
+    "never": "Hiç",
+    "status": "Durum",
+    "active": "Aktif",
+    "revoked": "İptal edildi",
+    "revoke": "İptal et",
+    "revokeTitle": "Anahtarı iptal et?",
+    "revokeBody": "Bu anahtarı kullanan tüm istekler anında 401 revoked_api_key almaya başlar. Bu işlem geri alınamaz.",
+    "cancel": "Vazgeç",
+    "confirm": "Evet, iptal et",
+    "newKeyTitle": "Yeni anahtarın hazır",
+    "newKeyWarning": "Bu anahtarı bir daha göremeyeceksin. Şimdi kopyala ve güvenli bir yerde (ör. ortam değişkeni) sakla.",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "done": "Kopyaladım, kapat",
+    "empty": "Henüz anahtar yok.",
+    "limit": "Aktif anahtar sınırına (5) ulaştın.",
+    "creating": "Oluşturuluyor…"
+  },
+  "logs": {
+    "title": "İstek logları",
+    "subtitle": "Son 90 gün. İstek içerikleri, IP'ler veya sorgulanan değerler asla saklanmaz.",
+    "time": "Zaman",
+    "endpoint": "Endpoint",
+    "status": "Durum",
+    "latency": "Süre",
+    "source": "Kaynak",
+    "all": "Tümü",
+    "filter": "Filtrele",
+    "empty": "Bu filtreyle eşleşen istek yok.",
+    "prev": "Önceki",
+    "next": "Sonraki",
+    "playground": "Playground"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "language": "Arayüz dili",
+    "save": "Kaydet",
+    "saved": "Kaydedildi",
+    "security": "Şifre ve güvenlik",
+    "securityDesc": "Şifre değiştirme, bağlı hesaplar (Google, GitHub, GitLab) ve oturumlar.",
+    "danger": "Tehlikeli bölge",
+    "deleteTitle": "Hesabı sil",
+    "deleteDesc": "Tüm API anahtarların, kullanım kayıtların ve hesabın kalıcı olarak silinir.",
+    "deleteConfirmLabel": "Onaylamak için SİL yaz",
+    "deleteWord": "SİL",
+    "deleteButton": "Hesabımı kalıcı olarak sil",
+    "deleting": "Siliniyor…"
+  },
+  "playground": {
+    "title": "Playground",
+    "subtitle": "Endpoint seç, parametreleri gir, gönder. İstek oturumun üzerinden gider ve kotandan düşer; API anahtarın tarayıcıya hiç gelmez.",
+    "endpoint": "Endpoint",
+    "send": "Gönder",
+    "sending": "Gönderiliyor…",
+    "response": "Yanıt",
+    "empty": "Yanıt burada görünecek.",
+    "loginRequired": "Playground'u kullanmak için giriş yap.",
+    "passwordNote": "Şifre tarayıcında SHA-1 ile hash'lenir; sunucuya sadece ilk 5 karakter gider.",
+    "password": "Şifre (cihazda hash'lenir)"
+  },
+  "common": {
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "error": "Bir hata oluştu",
+    "loading": "Yükleniyor…",
+    "back": "Geri"
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "title": "CyberQUA — Security API for Developers",
+    "description": "Don't write security yourself, ask CyberQUA. Link, leaked password, email, IP, security header and leaked key checks in a single HTTP request."
+  },
+  "nav": {
+    "docs": "Docs",
+    "playground": "Playground",
+    "pricing": "Pricing",
+    "dashboard": "Dashboard",
+    "login": "Sign in",
+    "register": "Start free",
+    "menu": "Menu",
+    "close": "Close",
+    "theme": "Theme",
+    "language": "Language",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "hero": {
+    "badge": "v1 LIVE · 6 SECURITY ENDPOINTS",
+    "title": "Don't write security yourself. Ask CyberQUA.",
+    "subtitle": "Phishing links, leaked passwords, throwaway emails, Tor exits, missing security headers and API keys hard-coded in source — all with a single HTTP request.",
+    "cta": "Get a free API key",
+    "secondary": "Read the docs",
+    "stat1": "requests / month free",
+    "stat2": "average response",
+    "stat3": "passwords or code stored"
+  },
+  "demo": {
+    "label": "LIVE DEMO",
+    "title": "Try a link right now",
+    "subtitle": "The link is never opened; only the address and reputation sources are analysed.",
+    "placeholder": "https://g00gle-login.xyz/verify",
+    "submit": "Analyse",
+    "loading": "Analysing…",
+    "score": "Risk score",
+    "reasons": "Findings",
+    "noReasons": "No significant risk found.",
+    "examples": "Examples:",
+    "limit": "The demo is limited to 10 requests per hour per IP."
+  },
+  "risk": {
+    "safe": "Safe",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "features": {
+    "label": "ENDPOINTS",
+    "title": "Six checks. One API.",
+    "url": { "title": "Link risk analysis", "desc": "Lookalike domains, homoglyphs, new domains, risky TLDs, shorteners and blacklists. The link is never opened." },
+    "password": { "title": "Password leaks", "desc": "k-anonymity: the password or its full hash never leaves the device." },
+    "headers": { "title": "Security header audit", "desc": "HSTS, CSP, clickjacking, cookies and TLS. A+–F grade with ready-to-paste fixes." },
+    "email": { "title": "Email validation", "desc": "Disposable providers, MX records, role addresses and typo suggestions." },
+    "ip": { "title": "IP reputation", "desc": "Private ranges, Tor exit nodes and AbuseIPDB abuse score." },
+    "secrets": { "title": "Leaked key scanning", "desc": "OpenAI, AWS, GitHub, Stripe, Supabase and more. Content is never stored, values are masked." }
+  },
+  "code": {
+    "label": "INTEGRATION",
+    "title": "Integrate in three lines",
+    "subtitle": "The same simple JSON in every language. With the official SDK, password checks run entirely on-device."
+  },
+  "usecases": {
+    "label": "USE CASES",
+    "title": "Real protection in real products",
+    "items": [
+      { "title": "Chat apps", "desc": "Check whether a shared link is phishing before the message is sent." },
+      { "title": "Sign-up forms", "desc": "Block leaked passwords and fake accounts created with throwaway emails." },
+      { "title": "Login security", "desc": "Ask for extra verification on logins from Tor or low-reputation IPs." },
+      { "title": "CI/CD", "desc": "Scan code for leaked API keys before shipping and fail the build." },
+      { "title": "Site audits", "desc": "Grade your clients' security headers and send ready-made fixes." },
+      { "title": "Support teams", "desc": "Assess suspicious emails and links in one click." }
+    ]
+  },
+  "pricing": {
+    "label": "PRICING",
+    "title": "Start free, upgrade as you grow",
+    "free": "Free",
+    "pro": "Pro",
+    "month": "/mo",
+    "soon": "Coming soon",
+    "freeFeatures": ["1,000 requests / month", "30 requests / minute", "All 6 endpoints", "5 API keys", "Community support"],
+    "proFeatures": ["50,000 requests / month", "300 requests / minute", "All 6 endpoints", "Priority support", "SLA"],
+    "freeCta": "Get started",
+    "proCta": "Coming soon"
+  },
+  "faq": {
+    "label": "FAQ",
+    "title": "Frequently asked questions",
+    "items": [
+      { "q": "Do I send my passwords to CyberQUA?", "a": "No. The SDK hashes the password on-device with SHA-1 and only sends the first 5 characters. The comparison also happens on-device." },
+      { "q": "Do you store the links or code I send?", "a": "No. Usage logs only contain the time, endpoint, status code and latency. Links, emails, password hashes and code are never stored." },
+      { "q": "Does /url/check open the link?", "a": "No. Only the URL itself and external reputation sources are analysed; no request is ever sent to the target page." },
+      { "q": "Can I use it from the browser?", "a": "Yes, with publishable (cq_pub_) keys and only from domains you allow. Secret keys only work server-side." },
+      { "q": "What happens when I run out of quota?", "a": "The API returns 429 quota_exceeded. Quotas reset at the start of each month (UTC)." }
+    ]
+  },
+  "footer": {
+    "tagline": "The security API for developers.",
+    "product": "Product",
+    "legal": "Legal",
+    "privacy": "Privacy (KVKK)",
+    "terms": "Terms of use",
+    "status": "Status",
+    "rights": "All rights reserved."
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in with email, Google, GitHub or GitLab.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Get your free API key in minutes. Email verification is required.",
+    "forgotTitle": "Reset your password",
+    "forgotSubtitle": "Enter your email on the sign-in screen and click \"Forgot password\"; a verification code will be emailed to you.",
+    "forgotCta": "Continue to password reset"
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "keys": "API keys",
+    "logs": "Request logs",
+    "settings": "Settings",
+    "playground": "Playground",
+    "docs": "Docs",
+    "thisMonth": "Usage this month",
+    "quota": "Monthly quota",
+    "requests30": "Requests, last 30 days",
+    "endpointDist": "Endpoint distribution",
+    "errorRate": "Error rate",
+    "avgLatency": "Avg latency",
+    "plan": "Plan",
+    "noData": "No requests yet. Create your first key and send a request.",
+    "requests": "requests",
+    "errors": "errors",
+    "createFirst": "Create your first key"
+  },
+  "keys": {
+    "title": "API keys",
+    "subtitle": "Up to 5 active keys. Only use secret keys on your server.",
+    "create": "Create key",
+    "name": "Name",
+    "namePlaceholder": "Production server",
+    "type": "Type",
+    "secret": "Secret (server)",
+    "publishable": "Publishable (browser)",
+    "origins": "Allowed domains",
+    "originsHelp": "One origin per line: https://example.com or https://*.example.com",
+    "prefix": "Prefix",
+    "created": "Created",
+    "lastUsed": "Last used",
+    "never": "Never",
+    "status": "Status",
+    "active": "Active",
+    "revoked": "Revoked",
+    "revoke": "Revoke",
+    "revokeTitle": "Revoke this key?",
+    "revokeBody": "Every request using this key will immediately receive 401 revoked_api_key. This cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Yes, revoke",
+    "newKeyTitle": "Your new key is ready",
+    "newKeyWarning": "You won't be able to see this key again. Copy it now and store it somewhere safe (e.g. an environment variable).",
+    "copy": "Copy",
+    "copied": "Copied",
+    "done": "I copied it, close",
+    "empty": "No keys yet.",
+    "limit": "You've reached the active key limit (5).",
+    "creating": "Creating…"
+  },
+  "logs": {
+    "title": "Request logs",
+    "subtitle": "Last 90 days. Request bodies, IPs and queried values are never stored.",
+    "time": "Time",
+    "endpoint": "Endpoint",
+    "status": "Status",
+    "latency": "Latency",
+    "source": "Source",
+    "all": "All",
+    "filter": "Filter",
+    "empty": "No requests match this filter.",
+    "prev": "Previous",
+    "next": "Next",
+    "playground": "Playground"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Interface language",
+    "save": "Save",
+    "saved": "Saved",
+    "security": "Password & security",
+    "securityDesc": "Change password, connected accounts (Google, GitHub, GitLab) and sessions.",
+    "danger": "Danger zone",
+    "deleteTitle": "Delete account",
+    "deleteDesc": "All your API keys, usage records and your account will be permanently deleted.",
+    "deleteConfirmLabel": "Type DELETE to confirm",
+    "deleteWord": "DELETE",
+    "deleteButton": "Permanently delete my account",
+    "deleting": "Deleting…"
+  },
+  "playground": {
+    "title": "Playground",
+    "subtitle": "Pick an endpoint, fill in the parameters, send. Requests go through your session and count against your quota; your API key never reaches the browser.",
+    "endpoint": "Endpoint",
+    "send": "Send",
+    "sending": "Sending…",
+    "response": "Response",
+    "empty": "The response will appear here.",
+    "loginRequired": "Sign in to use the playground.",
+    "passwordNote": "The password is hashed with SHA-1 in your browser; only the first 5 characters are sent.",
+    "password": "Password (hashed on-device)"
+  },
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "error": "Something went wrong",
+    "loading": "Loading…",
+    "back": "Back"
+  }
+}
