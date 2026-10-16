@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "update:disposable": "tsx scripts/update-disposable-domains.ts"
+    "update:disposable": "tsx scripts/update-disposable-domains.ts",
+    "test:sdk": "npm --prefix sdk test"
   },
   "dependencies": {
     "@clerk/localizations": "^4.23.0",
@@ -40,5 +41,8 @@
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
