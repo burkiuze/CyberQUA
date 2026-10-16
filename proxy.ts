@@ -1,10 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 
 const isProtectedPage = createRouteMatcher(["/dashboard(.*)"]);
 const isInternalApi = createRouteMatcher(["/api/internal(.*)"]);
 
-export default clerkMiddleware(
+const clerkProxy = clerkMiddleware(
   async (auth, req) => {
     if (isInternalApi(req)) {
       const { userId } = await auth();
@@ -38,6 +38,24 @@ export default clerkMiddleware(
     },
   },
 );
+
+/**
+ * Until CLERK_SECRET_KEY is configured the public pages (home, docs, legal)
+ * keep working; session-only areas answer with a clear "not configured" state.
+ */
+export default function proxy(req: NextRequest, event: NextFetchEvent) {
+  if (!process.env.CLERK_SECRET_KEY) {
+    if (isInternalApi(req)) {
+      return NextResponse.json(
+        { success: false, error: { code: "auth_not_configured", message: "Authentication is not configured yet." } },
+        { status: 503 },
+      );
+    }
+    if (isProtectedPage(req)) return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.next();
+  }
+  return clerkProxy(req, event);
+}
 
 export const config = {
   matcher: [

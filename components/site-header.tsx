@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { currentUserId } from "@/lib/session";
 import { UserButton } from "@clerk/nextjs";
 import { Logo } from "@/components/ui/logo";
 import { LocaleSwitcher, ThemeToggle } from "@/components/preferences";
@@ -7,7 +7,7 @@ import { MobileMenu } from "@/components/mobile-menu";
 import { getI18n } from "@/lib/i18n/server";
 
 export async function SiteHeader() {
-  const [{ dict }, { userId }] = await Promise.all([getI18n(), auth()]);
+  const [{ dict }, userId] = await Promise.all([getI18n(), currentUserId()]);
   const signedIn = !!userId;
   const links = [
     { href: "/docs", label: dict.nav.docs },

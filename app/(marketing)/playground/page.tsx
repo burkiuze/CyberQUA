@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { currentUserId } from "@/lib/session";
 import { getI18n } from "@/lib/i18n/server";
 import { Playground } from "@/components/playground/playground";
 
@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PlaygroundPage() {
-  const [{ dict }, { userId }] = await Promise.all([getI18n(), auth()]);
+  const [{ dict }, userId] = await Promise.all([getI18n(), currentUserId()]);
   return (
     <div className="frame px-4 py-10 md:px-10">
       <p className="eyebrow-accent">[ {dict.playground.title} ]</p>
