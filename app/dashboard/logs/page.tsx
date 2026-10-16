@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getI18n } from "@/lib/i18n/server";
-import { requireUserId } from "@/lib/auth";
+import { currentUserId } from "@/lib/session";
 import { listLogs } from "@/lib/dashboard";
 
 const ENDPOINTS = ["/url/check", "/email/check", "/password/range", "/headers", "/ip", "/secrets/scan"];
@@ -15,7 +15,8 @@ function first(v: string | string[] | undefined) {
 
 export default async function LogsPage({ searchParams }: { searchParams: SearchParams }) {
   const { dict, locale } = await getI18n();
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return null;
   const sp = await searchParams;
   const endpoint = ENDPOINTS.includes(first(sp.endpoint) ?? "") ? first(sp.endpoint)! : "";
   const statusRaw = first(sp.status) ?? "";

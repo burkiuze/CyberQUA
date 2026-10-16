@@ -1,12 +1,13 @@
 import { getI18n } from "@/lib/i18n/server";
-import { requireUserId } from "@/lib/auth";
+import { currentUserId } from "@/lib/session";
 import { listKeys } from "@/lib/dashboard";
 import { MAX_ACTIVE_KEYS } from "@/lib/plans";
 import { KeysManager } from "@/components/dashboard/keys-manager";
 
 export default async function KeysPage() {
   const { dict } = await getI18n();
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return null;
   const keys = await listKeys(userId);
 
   return (

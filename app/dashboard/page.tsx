@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getI18n } from "@/lib/i18n/server";
-import { ensureProfile, requireUserId } from "@/lib/auth";
+import { ensureProfile } from "@/lib/auth";
+import { currentUserId } from "@/lib/session";
 import { getMonthlyUsage, getUsageSummary } from "@/lib/dashboard";
 import { planLimits } from "@/lib/plans";
 import { Corners } from "@/components/ui/corners";
@@ -8,7 +9,8 @@ import { RequestsChart } from "@/components/dashboard/charts";
 
 export default async function DashboardPage() {
   const { dict, locale } = await getI18n();
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return null;
   const [profile, summary, used] = await Promise.all([ensureProfile(userId), getUsageSummary(userId), getMonthlyUsage(userId)]);
   const limits = planLimits(profile.plan);
   const pct = Math.min(100, Math.round((used / limits.monthlyQuota) * 100));

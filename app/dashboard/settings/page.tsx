@@ -1,11 +1,14 @@
 import { UserProfile } from "@clerk/nextjs";
 import { getI18n } from "@/lib/i18n/server";
-import { ensureProfile, requireUserId } from "@/lib/auth";
+import { ensureProfile } from "@/lib/auth";
+import { currentUserId } from "@/lib/session";
 import { DeleteAccount, LanguageForm } from "@/components/dashboard/settings-forms";
 
 export default async function SettingsPage() {
   const { dict } = await getI18n();
-  const profile = await ensureProfile(await requireUserId());
+  const userId = await currentUserId();
+  if (!userId) return null;
+  const profile = await ensureProfile(userId);
   return (
     <div className="space-y-8">
       <div>
